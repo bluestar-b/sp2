@@ -1,0 +1,204 @@
+import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+
+const host = "http://cutedomain.thddns.net:8885/"
+
+
+const socket = io.connect(host);
+
+
+socket.on('connect', function() {
+    console.log('Connected to the server');
+
+    setInterval(function() {
+        socket.emit('system_info');
+    }, 200)
+
+});
+
+socket.on('system_info', function(data) {
+    updateChartsWithData(data);
+
+});
+
+const ctx = document.getElementById('cpu-chart').getContext('2d');
+const mem = document.getElementById('mem-chart').getContext('2d');
+const datasets = [];
+
+const cpuData = {
+    labels: [],
+    datasets: datasets
+};
+
+
+const cpuChart = new Chart(ctx, {
+    type: 'line',
+    data: cpuData,
+    options: {
+        maintainAspectRatio: false,
+        responsive: false,
+        borderColor: "blue",
+        fill: false,
+        scales: {
+            x: {
+                max: 10,
+                display: false
+            },
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        },
+        animation: false
+    }
+});
+
+const memoryData = {
+    labels: [],
+    datasets: [
+        {
+            label: "Memory Usage(Percent)",
+            data: []
+    }
+  ]
+};
+
+const memChart = new Chart(mem, {
+    type: 'line',
+    data: memoryData,
+    options: {
+        maintainAspectRatio: false,
+        responsive: false,
+        borderColor: "blue",
+        fill: false,
+        scales: {
+            x: {
+                max: 10,
+                display: false
+            },
+            y: {
+                beginAtZero: false,
+                max: 100
+            }
+        },
+        animation: false
+    }
+});
+
+const memData = memoryData.datasets[0].data;
+
+
+function formatSize(size) {
+    const power = 2 ** 10;
+    let n = 0;
+    const labels = { 0: 'B', 1: 'KB', 2: 'MB', 3: 'GB', 4: 'TB' };
+
+    while (size > power) {
+        size /= power;
+        n += 1;
+    }
+
+    return `${size.toFixed(2)} ${labels[n]}`;
+}
+
+
+
+function updateChartsWithData(data) {
+
+
+    const currentTime = new Date().toLocaleTimeString();
+
+    document.getElementById("current-time").innerHTML = currentTime;
+
+    const cpuPercentList = document.getElementById('cpu-usage-list');
+    cpuPercentList.innerHTML = `<div>${data.cpu_percent.map((percent, index) => `<div>CPU-${index + 1}: ${percent.toFixed(2)}%</div>`).join('')}</div>`;
+
+
+    document.getElementById("memory-total").innerHTML = formatSize(data.memory_info.total);
+    document.getElementById("memory-available").innerHTML = formatSize(data.memory_info.available);
+    document.getElementById("memory-percent").innerHTML = data.memory_info.percent + "%";
+
+    document.getElementById("disk-total").innerHTML = formatSize(data.disk_usage.total);
+    document.getElementById("disk-used").innerHTML = formatSize(data.disk_usage.used);
+    document.getElementById("disk-free").innerHTML = formatSize(data.disk_usage.free);
+    document.getElementById("disk-percent").innerHTML = data.disk_usage.percent + "%";
+
+    document.getElementById("net-bytes-sent").innerHTML = formatSize(data.net_io_counters.bytes_sent);
+
+    document.getElementById("net-bytes-recv").innerHTML = formatSize(data.net_io_counters.bytes_recv);
+    document.getElementById("net-packets-sent").innerHTML = formatSize(data.net_io_counters.packets_sent);
+    document.getElementById("net-packets-recv").innerHTML = formatSize(data.net_io_counters.packets_recv);
+
+
+
+
+    memData.push(data.memory_info.percent);
+    if (memData.length > 10) {
+        memData.shift();
+    }
+    memoryData.labels.push(currentTime);
+
+    while (memoryData.labels.length > 10) {
+        memoryData.labels.shift();
+    }
+    memChart.update();
+
+
+    cpuData.labels.push(currentTime);
+
+    for (let i = 0; i < data.cpu_count; i++) {
+        cpuData.datasets[i] = cpuData.datasets[i] || {
+            label: `CPU ${i + 1}`,
+            data: [],
+            backgroundColor: `rgba(${Math.floor(Math.random() * 156) + 100}, ${Math.floor(Math.random() * 156) + 100}, ${Math.floor(Math.random() * 156) + 100}, 0.2)`,
+            borderColor: `rgba(${Math.floor(Math.random() * 156) + 100}, ${Math.floor(Math.random() * 156) + 100}, ${Math.floor(Math.random() * 156) + 100}, 1)`,
+            borderWidth: 2
+        };
+        cpuData.datasets[i].data.push(data.cpu_percent[i]);
+        if (cpuData.datasets[i].data.length > 10) {
+            cpuData.datasets[i].data.shift();
+        }
+    }
+
+    while (cpuData.labels.length > 10) {
+        cpuData.labels.shift();
+    }
+    cpuChart.update();
+}
+
+
+//mocking purpose
+const sampleData = {
+    "cpu_count": 4,
+    "cpu_percent": [8.2, 5.1, 2, 0],
+    "memory_info": {
+        "total": 3718639616,
+        "available": 2500792320,
+        "percent": 32.7
+    },
+    "disk_partitions": [
+        {
+            "device": "/dev/block/platform/soc/7824900.sdhci/by-name/userdata",
+            "mountpoint": "/",
+            "fstype": "ext4",
+            "opts": "rw,seclabel,noatime,discard,noauto_da_alloc,data=ordered",
+            "maxfile": 255,
+            "maxpath": 4096
+      }
+    ],
+    "disk_usage": {
+        "total": 56545558528,
+        "used": 5833773056,
+        "free": 50711785472,
+        "percent": 10.3
+    },
+    "net_io_counters": {
+        "bytes_sent": 395282496,
+        "bytes_recv": 4922912811,
+        "packets_sent": 2759439,
+        "packets_recv": 4492533,
+        "errin": 0,
+        "errout": 0,
+        "dropin": 0,
+        "dropout": 0
+    }
+};

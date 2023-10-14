@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <title></title>
+
+
+</head>
+
+<body>
+
+    <body>
+
+        <div class="bg-zinc-300 dark:bg-zinc-900 font-mono px-2 pt-2 text-gray-400 dark:text-gray-200">
+
+
+            <div class="p-2 border-2 border-zinc-200 w-fit rounded-md shadow-md">
+                <div id="current-time" class="font-bold text-2xl"></div>
+
+                <h2 class="text-2xl font-bold">CPU Usage</h2>
+
+                <div class="border-b-2 border-b-zinc-600" id="cpu-usage-list"></div><br>
+                <canvas id="cpu-chart"></canvas>
+
+            </div>
+
+            <div class="p-2 border-2 border-zinc-200 w-fit rounded-md shadow-md mt-2">
+
+                <div class="border-b-2 border-b-zinc-600">
+                    <h2 class="text-2xl font-bold">Memory Usage</h2>
+                    <p>Total: <span id="memory-total"></span></p>
+                    <p>Available: <span class="number" id="memory-available"></span></p>
+                    <p>Percent Used: <span id="memory-percent"></span></p>
+
+                </div>
+
+                <canvas id="mem-chart"></canvas>
+
+            </div>
+
+            <div class="p-2 border-2 border-zinc-200 w-fit rounded-md shadow-md mt-2">
+
+                <h2 class="text-2xl font-bold">Disk Usage</h2>
+                <p>Total: <span id="disk-total"></span></p>
+                <p>Used: <span id="disk-used"></span></p>
+                <p>Free: <span id="disk-free"></span></p>
+                <p>Percent Used: <span id="disk-percent"></span></p>
+
+            </div>
+            <div class="p-2 border-2 border-zinc-200 w-fit rounded-md shadow-md mt-2">
+
+                <h2 class="text-2xl font-bold">Network Usage</h2>
+                <p>Sent: <span id="net-bytes-sent"></span></p>
+                <p>Received: <span id="net-bytes-recv"></span></p>
+                <p>Packets Sent: <span id="net-packets-sent"></span></p>
+                <p>Packets Received: <span id="net-packets-recv"></span></p>
+            </div>
+        </div>
+
+
+        <script type="module" src="main.js"></script>
+    </body>
+
+</html>

@@ -1,0 +1,26 @@
+# Go
+*.exe
+*.dll
+*.so
+*.dylib
+/_test
+/vendor/
+/Godeps/
+/.glide/
+/bin/
+/pkg/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Node.js
+node_modules/
+npm-debug.log
